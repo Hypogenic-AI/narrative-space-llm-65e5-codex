@@ -1,0 +1,24 @@
+idea:
+  title: Narrative Space in LLMs
+  domain: artificial_intelligence
+  hypothesis: 'When large language models are asked to write stories involving spatial
+    navigation, such as moving through a building, they may diverge from human narrative
+    patterns in specific ways. There may exist a distinct grammar or structure to
+    LLM-generated spatial narratives, analogous to the sentence structures observed
+    in RLHF-trained models.
+
+    '
+  background:
+    description: "When LLMs are asked to write a story, and write about going through\
+      \ space, say in a building\u2014do they diverge from humans in certain ways?\
+      \ Just like RLHF'd models tend to use certain sentence structure, one might\
+      \ imagine a grammar of LLM spatial narratives.\n"
+  metadata:
+    author: Ari Holtzman
+    source: IdeaHub
+    source_url: https://hypogenic.ai/ideahub/idea/jtH4g6uBdJpi9kNJQqk9
+    idea_id: narrative_space_in_llms_20260608_142727_d9fee6ee
+    created_at: '2026-06-08T14:27:27.701848'
+    status: submitted
+    github_repo_name: narrative-space-llm-65e5-codex
+    github_repo_url: https://github.com/Hypogenic-AI/narrative-space-llm-65e5-codex
