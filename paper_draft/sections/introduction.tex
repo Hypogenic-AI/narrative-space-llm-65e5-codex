@@ -1,0 +1,28 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\para{Why spatial narrative?}
+\llms can now write polished stories about moving through buildings, following routes, and reacting to landmarks. This makes them useful for synthetic narrative data, interactive-fiction content, and language traces for embodied or simulated agents. The risk is that fluent prose can hide systematic differences in how a model introduces places, preserves route order, marks perspective, and ends movement sequences.
+
+\para{Our main question.}
+We ask whether \llm-generated stories about built-space movement show a measurable \spatialgrammar that differs from human spatial language. The question is narrower than general synthetic-text detection. We do not ask only whether generated text is longer, smoother, or more formulaic. We ask whether spatial and narrative features--landmarks, motion verbs, route-step density, egocentric deixis, survey terms, closure, and reuse--separate human and model-authored spatial texts.
+
+Existing work gives us two halves of the problem. Vision-and-language navigation datasets such as \rtr provide human route instructions grounded in indoor spaces \cite{anderson2018vision}, and later work shows that generated instructions can support navigation agents \cite{fried2018speaker}. Separately, human-vs-\llm style studies show that modern \llms have measurable grammatical and rhetorical fingerprints \cite{reinhart2025llms}. What is missing is a targeted corpus experiment that measures spatial-narrative structure rather than broad style alone.
+
+\input{figures/pipeline}
+
+\para{Our approach.}
+\Figref{fig:pipeline} summarizes the study. We create a paired benchmark from two sources. In \rtr, we sample 80 human indoor route instructions and ask \gptmini to produce a first-person micro-story that preserves the route order and stopping point. In \writingprompts, we select 34 prompts with spatial or built-environment terms and compare human prose excerpts against prompt-matched \gptmini stories. We then extract interpretable feature families and evaluate both statistical differences and supervised author separability.
+
+\para{Quantitative preview.}
+The main result is positive but qualified. Across all 228 texts, all features classify human vs. \llm authorship at 97.4\% accuracy, all non-length features reach 96.5\%, and spatial-only features reach 87.7\% with permutation $p=0.0099$. In the smaller prose-control subset, where both sides are stories rather than route instructions, spatial-only features still reach 83.8\% accuracy and all non-length features reach 94.1\%. The strongest \llm-leaning features are first-person language, sensory terms, formulaic phrases, and landmark reuse; human-leaning features include imperative sentence share and survey/route ratio.
+
+\para{Contributions.}
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item We propose a transparent feature profile for measuring \spatialgrammar in built-space narratives.
+    \item We construct a balanced human/\gptmini corpus from 80 \rtr route cases and 34 spatial \writingprompts cases.
+    \item We conduct feature-family ablations showing that spatial and narrative features separate authorship beyond length alone.
+    \item We qualify the result with a prose-control subset and an external \longstory sanity check, showing that the fingerprint is partly prompt- and genre-conditioned.
+\end{itemize}
+
+The rest of the paper reviews related work in \secref{sec:related}, describes the corpus and evaluation protocol in \secref{sec:method}, presents results in \secref{sec:results}, and discusses limits and implications in \secref{sec:discussion}.

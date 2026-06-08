@@ -1,0 +1,52 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Human and \llm Spatial Texts Are Highly Separable}
+\label{sec:classification-results}
+
+\input{tables/classification_results}
+
+\Figref{fig:classification-accuracy} and \tabref{tab:classification} show the main classifier results. Across the full corpus, all features reach 97.4\% accuracy and 99.7 ROC-AUC. Removing length barely changes the result: all non-length features still reach 96.5\% accuracy and 98.3 ROC-AUC. Spatial-only features reach 87.7\% accuracy, and the permutation test gives $p=0.0099$ for the spatial-only, all-without-length, and all-feature aggregate classifiers.
+
+The source-specific results clarify the role of genre. In \rtr, all non-length features separate the two author classes perfectly, and spatial-only features reach 98.1\% accuracy. This is expected because human \rtr texts are route instructions while \gptmini outputs are first-person stories. The more important check is \writingprompts: length-only accuracy falls to 69.1\%, but spatial-only features still reach 83.8\%, all non-length features reach 94.1\%, and all features reach 95.6\%. This weakens the simplest explanation that the full-corpus result is only a route-instruction artifact.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/classification_accuracy.png}
+    \caption{Classification accuracy by feature family. Spatial-only and narrative-only features both exceed the chance baseline, while all non-length features nearly match the full feature set.}
+    \label{fig:classification-accuracy}
+\end{figure}
+
+\subsection{The \llm Profile Is Sensory, First-Person, and Landmark-Reusing}
+\label{sec:feature-results}
+
+\input{tables/key_feature_differences}
+
+\Tabref{tab:key-features} lists the largest and most interpretable corrected feature differences. Across the full corpus, \gptmini uses far more sensory language than humans (14.67 vs. 1.77 terms per 1,000 tokens, BH $q=5.41{\times}10^{-32}$), more formulaic phrases (6.09 vs. 0.08 per 1,000, $q=5.46{\times}10^{-30}$), more first-person language (74.21 vs. 20.53 per 1,000, $q=1.62{\times}10^{-20}$), and more landmark reuse (0.317 vs. 0.121, $q=1.03{\times}10^{-14}$). Humans show higher imperative sentence share and higher survey/route ratio.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/key_feature_distributions.png}
+    \caption{Distributions for selected spatial and narrative features. \gptmini outputs concentrate on sensory and formulaic scene language, while human \rtr instructions contain more task-directed imperative structure.}
+    \label{fig:key-feature-distributions}
+\end{figure}
+
+\input{tables/writingprompts_features}
+
+The \writingprompts feature table is the strongest evidence against a pure route-instruction explanation. In this prose-control subset, \gptmini uses more landmarks (32.92 vs. 9.79 per 1,000, $q=4.62{\times}10^{-8}$), more sensory language (16.75 vs. 5.93 per 1,000, $q=1.19{\times}10^{-7}$), more route-step language (64.90 vs. 43.55, $q=8.33{\times}10^{-6}$), and more motion verbs (16.92 vs. 7.81 per 1,000, $q=7.06{\times}10^{-5}$). The model also has a lower survey/route ratio, suggesting a preference for embodied path progression over map-like description.
+
+\subsection{Feature Importance and External Transfer}
+\label{sec:importance-results}
+
+\input{tables/top_coefficients}
+
+\Figref{fig:top-coefficients} and \tabref{tab:top-coefficients} show standardized logistic coefficients for predicting \llm authorship. The top positive coefficients are first-person terms, word count, hapax ratio, formulaic phrases, sensory terms, and landmark reuse. The strongest negative coefficients include survey/route ratio, dialogue mark density, sentence count, and narrative/route ratio. The model is therefore not separating author class by a single feature; it combines perspective, style, route structure, and repetition.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/top_logistic_coefficients.png}
+    \caption{Top standardized logistic-regression coefficients for predicting \llm authorship. Positive coefficients are \llm-leaning; negative coefficients are human-leaning.}
+    \label{fig:top-coefficients}
+\end{figure}
+
+The \longstory sanity check shows limited transfer. A classifier trained on the main corpus predicts 43.8\% of the 80 \longstory excerpts as \llm, with mean \llm probability 0.412. This weak external transfer suggests that the measured fingerprint is not simply ``any AI story.'' It is tied to the tested model, prompts, corpus mixture, and spatial-navigation setup.

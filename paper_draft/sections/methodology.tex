@@ -1,0 +1,48 @@
+\section{Methodology}
+\label{sec:method}
+
+\para{Problem formulation.}
+We treat each text $x_i$ as an observation with author label $y_i \in \{\mathrm{human}, \mathrm{LLM}\}$ and source label $s_i \in \{\rtr, \writingprompts\}$. The goal is not to build a production detector. Instead, we ask whether transparent feature families contain enough signal to separate author class and whether the separating signal is spatial and narrative rather than only length.
+
+\subsection{Corpora and Generation}
+\label{sec:corpora}
+
+\input{tables/corpus_balance}
+
+\para{\rtr route cases.}
+We sampled 80 \rtr routes with seed 42 and selected one human instruction per route. For each route, \gptmini generated one 160--220 word first-person micro-story that preserved the route constraints, order, and stopping point. This setting directly tests whether a model narrativizes a concrete indoor route differently from human route language, but it also introduces a known genre shift: human texts are instructions, while model texts are stories.
+
+\para{\writingprompts prose control.}
+To reduce the route-instruction vs. fiction confound, we also used 34 \writingprompts prompt/story pairs whose prompts contained spatial or built-environment terms. Human stories were truncated to 220 words. \gptmini received the original prompt and was asked for a 160--220 word first-person story scene centered on embodied movement through an indoor or built space when compatible.
+
+\para{External sanity check.}
+We used 80 spatial \longstory excerpts as an external AI-story check. These excerpts were not used for training or cross-validation. A classifier trained on the main corpus scored them only after all main analyses were complete.
+
+\para{Model and reproducibility details.}
+Generation used the OpenAI Responses API with \gptmini, temperature 0.7, and max output tokens 320. The run made 114 API calls, used 20,316 input tokens and 29,078 output tokens, and completed in 6 minutes 33 seconds. Based on the official \gptmini model and pricing pages, the input/output prices at the time of the run were USD 0.75 and USD 4.50 per one million tokens, respectively \cite{openai2026gpt54mini,openai2026pricing}. The estimated generation cost was about USD 0.15. All prompt records are saved in \texttt{results/prompts/llm\_prompts.jsonl}.
+
+\subsection{Feature Extraction}
+\label{sec:features}
+
+We use interpretable regex/count features implemented in \texttt{src/features.py}. We normalize many lexical counts per 1,000 tokens so that length does not dominate every comparison. The feature set has three families.
+
+\para{Length and generic style.}
+These features include word count, sentence count, mean sentence length, lexical diversity, hapax ratio, nominalization-like suffixes, \texttt{-ing} participials, coordination, \texttt{that}, and passive-like forms. They provide a generic synthetic-text baseline.
+
+\para{Spatial grammar.}
+These features count direction terms, cardinal/survey terms, egocentric terms, landmarks, motion verbs, sequence markers, deixis, route-step density, landmark reuse, left/right imbalance, explicit closure, and imperative sentence share. This family is the main test of the \spatialgrammar hypothesis.
+
+\para{Narrative embellishment.}
+These features count first-person and second-person language, sensory terms, affect terms, formulaic phrases, dialogue marks, and narrative-to-route ratio. We keep this family separate because it captures the story-like packaging that may accompany spatial movement.
+
+\subsection{Evaluation}
+\label{sec:evaluation}
+
+\para{Feature tests.}
+For planned feature comparisons, we use Mann-Whitney U tests as the primary nonparametric test, Benjamini-Hochberg correction across feature comparisons, and Cohen's $d$ plus Cliff's delta as effect sizes. We report the most interpretable corrected differences in \secref{sec:feature-results}.
+
+\para{Classifier ablations.}
+We train standardized logistic-regression classifiers with stratified 5-fold cross-validation. We report accuracy, F1, ROC-AUC, and bootstrap 95\% confidence intervals for cross-validated accuracy. The ablations are chance, length-only, spatial-only, narrative-only, all non-length features, and all features. We also run 100-label permutation tests for the aggregate spatial-only, all-without-length, and all-feature classifiers; this gives a minimum attainable $p$-value of 0.0099.
+
+\para{Baselines and interpretation.}
+Chance is 50\% because the corpus is balanced by author class. Length-only is an important negative-control baseline: if it performs as well as richer families, then the result is mostly a length artifact. Source-specific analyses for \rtr and \writingprompts expose genre sensitivity.

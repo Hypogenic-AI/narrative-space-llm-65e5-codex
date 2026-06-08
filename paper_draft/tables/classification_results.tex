@@ -1,0 +1,25 @@
+\begin{table}[t]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}llcccc@{}}
+        \toprule
+        \textbf{Scope} & \textbf{Feature family} & \textbf{Accuracy} & \textbf{F1} & \textbf{ROC-AUC} & \textbf{95\% acc. CI} \\
+        \midrule
+        All & Length-only & 87.7 & 89.0 & 90.9 & 83.3--92.5 \\
+        All & Spatial-only & 87.7 & 88.4 & 95.6 & 85.9--89.1 \\
+        All & Narrative-only & 94.7 & 94.8 & 97.8 & 92.6--96.5 \\
+        All & All without length & 96.5 & 96.6 & 98.3 & 94.7--98.7 \\
+        All & All features & {\bf 97.4} & {\bf 97.4} & {\bf 99.7} & {\bf 95.1--99.1} \\
+        \midrule
+        \rtr & Spatial-only & 98.1 & 98.2 & 100.0 & 95.6--100.0 \\
+        \rtr & All without length & {\bf 100.0} & {\bf 100.0} & {\bf 100.0} & {\bf 100.0--100.0} \\
+        \midrule
+        \writingprompts & Length-only & 69.1 & 69.6 & 82.0 & 60.9--75.3 \\
+        \writingprompts & Spatial-only & 83.8 & 84.1 & 89.1 & 72.9--95.7 \\
+        \writingprompts & All without length & 94.1 & 94.3 & 95.8 & 92.5--97.1 \\
+        \writingprompts & All features & {\bf 95.6} & {\bf 95.8} & {\bf 97.8} & {\bf 92.6--98.6} \\
+        \bottomrule
+    \end{tabular}}
+    \caption{Author-classification results under stratified 5-fold cross-validation. Values are percentages. Best result within each scope is in \textbf{bold}.}
+    \label{tab:classification}
+\end{table}

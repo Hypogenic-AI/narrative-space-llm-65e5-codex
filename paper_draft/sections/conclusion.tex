@@ -1,0 +1,6 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We tested whether \llm-generated built-space stories differ from human spatial language in measurable ways. Using a balanced corpus of 114 human texts and 114 \gptmini generations, we found strong author separability with interpretable features: 97.4\% accuracy with all features, 96.5\% without length, and 87.7\% with spatial-only features. In a smaller \writingprompts prose-control subset, spatial-only features still reached 83.8\% accuracy and all non-length features reached 94.1\%.
+
+The main takeaway is cautious: \gptmini has a measurable spatial-narrative fingerprint in this setup, but the fingerprint should be read as a prompt- and genre-conditioned feature profile rather than evidence about model-internal spatial maps. Future work should collect human-written 160--220 word first-person building-navigation stories from the same prompts used for \llms, add human judgments of spatial coherence and route validity, and compare base, instruction-tuned, and preference-tuned models across multiple model families.

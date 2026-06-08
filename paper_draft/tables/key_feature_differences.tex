@@ -1,0 +1,18 @@
+\begin{table}[t]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}llrrlr@{}}
+        \toprule
+        \textbf{Scope} & \textbf{Feature} & \textbf{Human mean} & \textbf{\llm mean} & \textbf{Direction} & \textbf{BH $q$} \\
+        \midrule
+        All & \texttt{sensory\_per\_1000} & 1.77 & 14.67 & \llm higher & $5.41{\times}10^{-32}$ \\
+        All & \texttt{formulaic\_phrase\_per\_1000} & 0.08 & 6.09 & \llm higher & $5.46{\times}10^{-30}$ \\
+        All & \texttt{survey\_route\_ratio} & 0.252 & 0.065 & \llm lower & $5.09{\times}10^{-28}$ \\
+        All & \texttt{imperative\_sentence\_share} & 0.543 & 0.000 & \llm lower & $1.50{\times}10^{-24}$ \\
+        All & \texttt{first\_person\_per\_1000} & 20.53 & 74.21 & \llm higher & $1.62{\times}10^{-20}$ \\
+        All & \texttt{landmark\_reuse\_ratio} & 0.121 & 0.317 & \llm higher & $1.03{\times}10^{-14}$ \\
+        \bottomrule
+    \end{tabular}}
+    \caption{Key full-corpus feature differences after Benjamini-Hochberg correction. The largest effects show \gptmini using more sensory, formulaic, first-person, and landmark-reusing language, while human texts use more imperative route grammar.}
+    \label{tab:key-features}
+\end{table}

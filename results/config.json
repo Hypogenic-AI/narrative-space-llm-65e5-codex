@@ -1,0 +1,13 @@
+{
+  "created_at_utc": "2026-06-08T14:54:11.132451+00:00",
+  "seed": 42,
+  "python_version": "3.12.8 (main, Dec 19 2024, 14:33:20) [Clang 18.1.8 ]",
+  "n_human_r2r": 80,
+  "n_human_writingprompts": 34,
+  "n_llm_prompts": 114,
+  "n_external_longstory": 80,
+  "gpu_status": "name, memory.total [MiB], memory.free [MiB]\nNVIDIA RTX A6000, 49140 MiB, 48541 MiB\nNVIDIA RTX A6000, 49140 MiB, 48541 MiB\nNVIDIA RTX A6000, 49140 MiB, 48541 MiB\nNVIDIA RTX A6000, 49140 MiB, 48541 MiB",
+  "primary_model": "gpt-5.4-mini",
+  "model_temperature": 0.7,
+  "model_max_output_tokens": 320
+}

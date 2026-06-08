@@ -1,0 +1,753 @@
+You are an academic paper writer. Generate a complete NEURIPS style paper
+based on the experiment results provided.
+
+════════════════════════════════════════════════════════════════════════════════
+                         IMPORTANT: BEFORE YOU START
+════════════════════════════════════════════════════════════════════════════════
+
+Before writing any content, you MUST complete these steps:
+
+1. READ THE SKILL: Review the paper-writer skill at .codex/skills/paper-writer/SKILL.md
+2. READ THE STYLE GUIDE: Study templates/paper_writing/lab_style_guide.md carefully
+3. REVIEW EXAMPLES: Browse paper_examples/ for formatting and language patterns:
+   - Look at sections/1.introduction.tex for language style
+   - Look at tables/*.tex for table formatting
+   - Look at commands/*.tex for macro usage
+4. VERIFY COMMAND TEMPLATES: Command templates (math.tex, general.tex, macros.tex) are pre-copied to paper_draft/commands/
+
+CRITICAL: Reference example papers for FORMATTING and LANGUAGE STYLE only.
+Do NOT copy content, phrasing, or narrative structure from the example papers.
+The examples are in a different research domain - focus only on presentation style.
+
+════════════════════════════════════════════════════════════════════════════════
+                            EXPERIMENT REPORT
+════════════════════════════════════════════════════════════════════════════════
+
+# Narrative Space in LLMs: Research Report
+
+## 1. Executive Summary
+
+This study tested whether LLM-generated stories about moving through built space show a measurable spatial-narrative grammar that differs from human spatial language. I built a balanced corpus of 114 human texts and 114 real GPT-5.4-mini generations: 80 R2R indoor route cases and 34 spatial WritingPrompts prose-control cases.
+
+The main finding is positive but qualified. Human and LLM spatial texts were highly separable by engineered features: all features reached 97.4% cross-validated accuracy, all non-length features reached 96.5%, and spatial-only features reached 87.7% with permutation p = 0.0099. The smaller WritingPrompts control, where both sides are prose rather than route instructions, still showed 83.8% accuracy with spatial-only features and 94.1% with all non-length features.
+
+Practically, the observed LLM pattern is not just "more words." GPT-5.4-mini tended to convert spatial movement into first-person embodied scenes with higher sensory language, formulaic phrases, repeated landmarks, and explicit route-like closure, while human R2R instructions were denser in imperatives and motion commands. The evidence supports a measurable LLM spatial-narrative fingerprint, but it should be treated as a feature profile under this prompting setup, not as proof of a stable cognitive map difference.
+
+## 2. Research Question & Motivation
+
+The hypothesis was: when LLMs are asked to write stories involving spatial navigation, such as moving through a building, they may diverge from human narrative patterns in systematic ways. The motivating idea is that there may be a "grammar" of LLM spatial narratives analogous to known LLM stylistic tics.
+
+This matters because LLM spatial stories are used as synthetic data, interactive-fiction content, and sometimes as planning traces for embodied or simulated agents. If these texts encode spatial movement differently from human texts, they may be fluent but systematically biased in how they introduce landmarks, preserve route order, express perspective, and close movement sequences.
+
+The literature review suggested a gap: R2R and related VLN datasets capture human indoor route language, while human-vs-LLM style studies capture broad linguistic differences, but little existing work directly measures human-vs-LLM differences in spatial narrative structure.
+
+## 3. Experimental Setup
+
+### Models Tested
+
+- Model: `gpt-5.4-mini`
+- API: OpenAI Responses API
+- Parameters: temperature 0.7, max output tokens 320
+- Generation count: 114 calls
+- Token usage: 20,316 input tokens, 29,078 output tokens, 49,394 total tokens
+- Estimated API cost: about USD 0.15 using official GPT-5.4-mini pricing of USD 0.75 per 1M input tokens and USD 4.50 per 1M output tokens. See the OpenAI GPT-5.4 mini model/pricing docs in References.
+
+### Datasets
+
+| Dataset | Role | Size used | Notes |
+|---|---:|---:|---|
+| R2R Navigation Instructions | Human route baseline | 80 routes, 80 human instructions | One instruction sampled per route; GPT generated one first-person story from route constraints. |
+| WritingPrompts spatial sample | Human prose control | 34 prompt/story pairs | Used prompts whose prompt text had spatial or built-environment terms; human stories truncated to 220 words. |
+| LongStory | External AI sanity check | 80 excerpts | Not used for training; scored with classifier trained on main corpus. |
+
+### Prompts
+
+R2R prompts asked GPT-5.4-mini to write a 160-220 word first-person micro-story preserving the order and stopping point of the route constraints. WritingPrompts prompts asked for a 160-220 word first-person story scene responding to the original prompt, centered on embodied movement through an indoor or built space when compatible.
+
+Full prompt records are saved in `results/prompts/llm_prompts.jsonl`.
+
+### Features
+
+Feature extraction used transparent regex/count features rather than embeddings:
+
+- Length/generic style: word count, sentence count, mean sentence length, lexical diversity, nominalization-like suffixes, `-ing` participials, coordination, `that`, passive-like forms.
+- Spatial grammar: direction terms, cardinal/survey terms, egocentric terms, landmarks, motion verbs, sequence markers, deixis, route-step density, landmark reuse, left/right imbalance, closure, imperative sentence share.
+- Narrative embellishment: first/second person, sensory terms, affect terms, formulaic phrases, and narrative-to-route ratio.
+
+The implementation is in `src/features.py`.
+
+### Statistical Plan
+
+The preregistered plan in `planning.md` used:
+
+- Mann-Whitney U tests as the primary feature-comparison test.
+- Benjamini-Hochberg correction across planned feature comparisons.
+- Cohen's d and Cliff's delta as effect sizes.
+- Stratified 5-fold cross-validation for logistic-regression classifiers.
+- Feature-family ablations: length-only, generic, spatial, narrative, all, and all-without-length.
+- 100-label permutation tests for the aggregate spatial, all, and all-without-length classifiers.
+
+### Compute Environment
+
+- Python: 3.12.8
+- Key packages: pandas, scipy, scikit-learn, statsmodels, matplotlib, seaborn, datasets, openai
+- GPU availability: four NVIDIA RTX A6000 GPUs, each 49,140 MiB total memory
+- GPU usage: no GPU computation was needed because this was API-based generation plus CPU feature analysis; no neural training batch size was used.
+- Generation time: 114 API generations completed in 6 minutes 33 seconds.
+- Reproducibility seed: 42
+
+## 4. Results
+
+### Corpus Balance
+
+| Source | Human n | LLM n |
+|---|---:|---:|
+| R2R | 80 | 80 |
+| WritingPrompts | 34 | 34 |
+| Total | 114 | 114 |
+
+### Classification Results
+
+The strongest result was that non-length features were still highly predictive of author class.
+
+| Scope | Feature family | Accuracy | F1 | ROC-AUC | 95% CV accuracy CI |
+|---|---|---:|---:|---:|---:|
+| All | length-only | 0.877 | 0.890 | 0.909 | 0.833-0.925 |
+| All | spatial-only | 0.877 | 0.884 | 0.956 | 0.859-0.891 |
+| All | narrative-only | 0.947 | 0.948 | 0.978 | 0.926-0.965 |
+| All | all no length | 0.965 | 0.966 | 0.983 | 0.947-0.987 |
+| All | all features | 0.974 | 0.974 | 0.997 | 0.951-0.991 |
+| R2R | spatial-only | 0.981 | 0.982 | 1.000 | 0.956-1.000 |
+| R2R | all no length | 1.000 | 1.000 | 1.000 | 1.000-1.000 |
+| WritingPrompts | length-only | 0.691 | 0.696 | 0.820 | 0.609-0.753 |
+| WritingPrompts | spatial-only | 0.838 | 0.841 | 0.891 | 0.729-0.957 |
+| WritingPrompts | all no length | 0.941 | 0.943 | 0.958 | 0.925-0.971 |
+| WritingPrompts | all features | 0.956 | 0.958 | 0.978 | 0.926-0.986 |
+
+Permutation tests for the aggregate classifiers gave p = 0.0099 for spatial-only, all-without-length, and all-features. The p-value floor is set by 100 permutations.
+
+![Classification accuracy by feature family](figures/classification_accuracy.png)
+
+### Key Feature Differences
+
+Across the full corpus, GPT-5.4-mini outputs had much higher sensory language, formulaic phrases, first-person language, and landmark reuse. Human texts, especially R2R, had more imperative structure and a higher survey/route ratio.
+
+| Scope | Feature | Human mean | LLM mean | Direction | BH q |
+|---|---|---:|---:|---|---:|
+| All | sensory_per_1000 | 1.77 | 14.67 | LLM higher | 5.41e-32 |
+| All | formulaic_phrase_per_1000 | 0.08 | 6.09 | LLM higher | 5.46e-30 |
+| All | survey_route_ratio | 0.252 | 0.065 | LLM lower | 5.09e-28 |
+| All | imperative_sentence_share | 0.543 | 0.000 | LLM lower | 1.50e-24 |
+| All | first_person_per_1000 | 20.53 | 74.21 | LLM higher | 1.62e-20 |
+| All | landmark_reuse_ratio | 0.121 | 0.317 | LLM higher | 1.03e-14 |
+
+The WritingPrompts prose-control produced the most relevant evidence against a pure route-instruction artifact:
+
+| Feature | Human mean | LLM mean | Direction | BH q |
+|---|---:|---:|---|---:|
+| landmark_per_1000 | 9.79 | 32.92 | LLM higher | 4.62e-08 |
+| sensory_per_1000 | 5.93 | 16.75 | LLM higher | 1.19e-07 |
+| route_step_density | 43.55 | 64.90 | LLM higher | 8.33e-06 |
+| motion_per_1000 | 7.81 | 16.92 | LLM higher | 7.06e-05 |
+| formulaic_phrase_per_1000 | 0.28 | 2.79 | LLM higher | 1.96e-04 |
+| survey_route_ratio | 0.289 | 0.117 | LLM lower | 5.60e-04 |
+
+![Key spatial narrative features](figures/key_feature_distributions.png)
+
+### Feature Importance
+
+The top standardized logistic coefficients for predicting LLM authorship were:
+
+| Feature | Coefficient |
+|---|---:|
+| first_person_per_1000 | 1.463 |
+| word_count | 1.434 |
+| hapax_ratio | 1.217 |
+| formulaic_phrase_per_1000 | 1.089 |
+| sensory_per_1000 | 0.991 |
+| landmark_reuse_ratio | 0.972 |
+| survey_route_ratio | -0.896 |
+| dialogue_mark_density | -0.860 |
+| sentence_count | -0.845 |
+| narrative_route_ratio | -0.835 |
+
+Positive coefficients indicate LLM-leaning features. Negative coefficients indicate human-leaning features in this model.
+
+![Top logistic coefficients](figures/top_logistic_coefficients.png)
+
+### External LongStory Check
+
+A classifier trained on the main corpus predicted 43.8% of the 80 spatial LongStory excerpts as LLM, with mean LLM probability 0.412. This weak external transfer suggests the detected fingerprint is not simply "any AI story"; it is partly tied to the specific prompt, model, corpus genre, and spatial-navigation setup.
+
+## 5. Analysis & Discussion
+
+The results support the existence of a measurable LLM spatial-narrative profile under the tested conditions. The most interpretable pattern is that GPT-5.4-mini often turns navigation into an embodied, sensory, first-person passage: it repeats landmarks, adds atmosphere, uses formulaic scene beats, and reduces instruction-like imperatives. In contrast, human R2R language is terse, task-directed, and dense with motion commands.
+
+The WritingPrompts control matters because it weakens the simplest alternative explanation. In that subset, length-only accuracy was only 69.1%, but spatial-only accuracy was 83.8% and all non-length features reached 94.1%. The LLM prose used more landmarks, movement verbs, route-step language, sensory language, and formulaic phrases than human prompt-matched prose excerpts.
+
+The strongest caveat is that the R2R experiment deliberately asks an LLM to transform route instructions into first-person fiction. That creates a genre shift: human R2R texts are instructions, while LLM outputs are stories. The no-length and spatial-only ablations reduce but do not eliminate this confound. The WritingPrompts subset is closer to the target question, but it is small at 34 matched prompts.
+
+The evidence therefore supports a cautious claim: there is a measurable "grammar" of LLM spatial narratives in this setup, but the present study cannot fully separate model-internal spatial representation from prompt style, genre, and instruction-following artifacts.
+
+## 6. Limitations
+
+- R2R is a route-instruction corpus, not a literary narrative corpus. Its perfect length-only separability shows a real genre confound.
+- The WritingPrompts spatial subset contains only 34 prompt-matched examples after deduplication and prompt-term filtering.
+- Only one current LLM, GPT-5.4-mini, was tested. The effect may differ for base models, other RLHF families, or smaller open models.
+- The prompts requested first-person stories, so first-person effects partly reflect experimental instructions.
+- Feature extraction is approximate and regex-based. It favors interpretability over parser-level precision.
+- No human annotators judged spatial coherence, route validity, or narrative quality.
+- API models can change over time; exact replication depends on continued availability of `gpt-5.4-mini`.
+- The study does not prove that LLMs lack or possess spatial maps; it measures textual behavior.
+
+## 7. Conclusions & Next Steps
+
+The answer to the research question is yes, with qualifications: GPT-5.4-mini spatial narratives diverged from human spatial texts in measurable, interpretable ways. The clearest profile was a first-person, sensory, formulaic, landmark-reusing narrative style, plus lower use of imperative route-instruction grammar.
+
+The next step should be a cleaner human-vs-LLM prose benchmark: collect human-written 160-220 word first-person building-navigation stories from the same prompts used for LLMs, then evaluate spatial graph consistency with human annotation. A second useful extension is multi-model testing across base, instruction-tuned, and RLHF/RLAIF models to determine whether the spatial grammar is model-family-specific.
+
+## Reproduction Artifacts
+
+- Plan: `planning.md`
+- Code: `src/prepare_corpora.py`, `src/generate_llm_outputs.py`, `src/features.py`, `src/analyze_results.py`
+- Prompts: `results/prompts/llm_prompts.jsonl`
+- Human corpus: `results/human_corpus.jsonl`
+- LLM outputs: `results/model_outputs/gpt-5.4-mini_outputs.jsonl`
+- Feature table: `results/features.csv`
+- Statistical tests: `results/evaluations/feature_tests.csv`
+- Classifier metrics: `results/evaluations/classification_metrics.csv`
+- Figures: `figures/classification_accuracy.png`, `figures/key_feature_distributions.png`, `figures/top_logistic_coefficients.png`
+
+## References
+
+- Anderson et al. 2018. Vision-and-Language Navigation: Interpreting visually-grounded navigation instructions in real environments. Downloaded as `papers/1711.07280_vision_language_navigation_r2r.pdf`.
+- Fried et al. 2018. Speaker-Follower Models for Vision-and-Language Navigation. Downloaded as `papers/1806.02724_speaker_follower_vln.pdf`.
+- Reinhart et al. 2024/2025. Do LLMs write like humans? Downloaded as `papers/2410.16107_llms_write_like_humans_styles.pdf`.
+- Wu et al. 2024. Mind's Eye of LLMs: Visualization-of-Thought. Downloaded as `papers/2404.03622_visualization_of_thought_spatial_reasoning.pdf`.
+- Wu and Deng 2025. Spatial Representation of LLMs in 2D Scene. Downloaded as `papers/wu_2025_spatial_representation_llms_2d_scene.pdf`.
+- Xia et al. 2026. StoryAlign. Downloaded as `papers/2605.04831_storyalign_story_reward_models.pdf`.
+- OpenAI. GPT-5.4 mini model documentation and pricing. https://developers.openai.com/api/docs/models/gpt-5.4-mini
+- OpenAI. API pricing page. https://openai.com/api/pricing
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH PLAN
+════════════════════════════════════════════════════════════════════════════════
+
+# Narrative Space in LLMs: Research Plan
+
+## Motivation & Novelty Assessment
+
+### Why This Research Matters
+LLM stories are increasingly used as synthetic narrative data, interactive-fiction content, and planning traces for embodied agents. If model-generated spatial narratives follow a distinct grammar, they may sound fluent while encoding different assumptions about routes, landmarks, perspective, and movement than human-authored spatial language.
+
+### Gap in Existing Work
+The gathered literature shows strong work on human route instructions (R2R), LLM spatial reasoning failures, and broad human-vs-LLM stylistic fingerprints. What is missing is a targeted corpus experiment that asks whether human and LLM texts about moving through built space are separable by spatial-narrative features, not only by generic synthetic-text style.
+
+### Our Novel Contribution
+This study will build a small matched spatial-narrative benchmark from existing human data and new real GPT-5.4-mini generations. It will test a proposed "spatial grammar" feature set: direction terms, landmark introductions, route-sequence markers, egocentric perspective, survey-language use, movement density, narrative closure, and repetition/templating.
+
+### Experiment Justification
+- Experiment 1: R2R route transformation. Needed to test whether an LLM asked to narrativize a concrete indoor route differs from human route language over the same kind of spatial path.
+- Experiment 2: WritingPrompts spatial prose. Needed to reduce the route-instruction vs fiction confound by comparing human prose to LLM prose generated from the same spatial prompts.
+- Experiment 3: Feature-family ablation. Needed to determine whether spatial features add explanatory signal beyond generic lexical/style features.
+- Experiment 4: Error and validity analysis. Needed to identify whether classifier separation reflects spatial grammar, genre artifacts, length, or prompt leakage.
+
+## Research Question
+When current LLMs are asked to write stories involving movement through built space, do their spatial narratives diverge measurably from human spatial narratives, and can those divergences be described as a distinct spatial-narrative grammar?
+
+## Background and Motivation
+R2R provides human indoor navigation instructions, while WritingPrompts gives human fiction-like prose with spatial cues. Prior work shows LLMs have recognizable linguistic tics and often struggle with spatial representation, but no pre-gathered paper directly tests the spatial structure of LLM narrative prose against human spatial texts. A feature-based corpus study can provide an initial, reproducible answer.
+
+## Hypothesis Decomposition
+- H1: Human and LLM spatial texts are classifiable above chance using engineered narrative-space features.
+- H2: Spatial feature families alone classify better than chance and improve over generic style features.
+- H3: LLM spatial narratives use more formulaic sequencing, explicit closure, sensory/affective embellishment, and first-person route framing than human route instructions.
+- H4: LLM prose differs from human spatial prose even when prompts are matched, though effects may be weaker than in R2R because genre is more controlled.
+
+Independent variables are author class (human vs LLM), source corpus (R2R vs WritingPrompts), and feature family (generic, spatial, narrative, all). Dependent variables are feature values, classifier accuracy/F1/ROC-AUC, and per-feature effect sizes. Alternative explanations include genre mismatch, length differences, prompt-induced style, and LLM copying of route seed text.
+
+## Proposed Methodology
+
+### Approach
+Create two paired corpora. For R2R, sample 80 routes and generate one GPT-5.4-mini first-person micro-story from the route instructions. Pair each with one human R2R instruction. For WritingPrompts, use all prompts whose prompt text contains spatial/built-environment terms and generate GPT-5.4-mini stories from the same prompt; compare with the corresponding human story excerpt. Extract interpretable features and evaluate both statistical differences and supervised separability.
+
+### Experimental Steps
+1. Validate datasets and sample fixed records with seed 42, preserving IDs and source labels.
+2. Generate LLM outputs with the OpenAI API using `gpt-5.4-mini`, temperature 0.7, max output tokens 320, and cached JSONL outputs.
+3. Normalize human and LLM texts to comparable excerpts where needed, without altering lexical content.
+4. Extract feature families: generic style, spatial terms, route grammar, and narrative embellishment.
+5. Run descriptive EDA, group comparisons, feature ablations, and classifiers.
+6. Inspect top coefficients and misclassified examples to assess whether spatial grammar rather than length or genre dominates.
+
+### Baselines
+- Chance baseline: 50% balanced human-vs-LLM classification.
+- Generic-style baseline: lexical/sentence/formulaic features without spatial features.
+- Spatial-only baseline: direction, landmark, motion, route-order, and perspective features.
+- Source-specific baselines: R2R only and WritingPrompts only to expose genre sensitivity.
+
+### Evaluation Metrics
+- Descriptive feature statistics: mean, standard deviation, medians, and bootstrap confidence intervals.
+- Statistical tests: Mann-Whitney U for non-normal independent groups; Welch tests as sensitivity checks for approximately normal features.
+- Effect sizes: Cohen's d and Cliff's delta for key feature differences.
+- Classification: stratified 5-fold cross-validated accuracy, F1, ROC-AUC, and permutation-test p-value where feasible.
+- Feature importance: standardized logistic regression coefficients and random forest impurity/permutation importances.
+
+### Statistical Analysis Plan
+Use alpha = 0.05 with Benjamini-Hochberg correction over the planned feature comparisons. Because text-feature distributions are often skewed, Mann-Whitney U is primary. Classification performance will be reported with fold-level means and 95% bootstrap confidence intervals. Ablations will be compared descriptively and, when fold pairing permits, with paired tests across cross-validation folds.
+
+## Expected Outcomes
+Evidence for the hypothesis would include above-chance classification, spatial-only features above chance, and large corrected effects in route-sequencing or perspective features. Evidence against it would be weak classification after controlling for length/source or spatial features adding little beyond generic style.
+
+## Timeline and Milestones
+- Setup and resource validation: 10 minutes.
+- Planning and preregistration: 20 minutes.
+- Implementation: 60 minutes.
+- LLM generation and experiment execution: 60-90 minutes depending on API latency.
+- Analysis and visualization: 30-45 minutes.
+- Report and reproducibility validation: 30 minutes.
+
+## Potential Challenges
+- API failures or rate limits: cache every response, retry with exponential backoff, and document any missing outputs.
+- Genre confound: report R2R and WritingPrompts separately and include generic-feature ablations.
+- Unequal lengths: use normalized per-1,000-token features and include length-only checks.
+- Feature validity: keep features interpretable and label approximate regex-based measures honestly.
+- Small WritingPrompts prompt-spatial subset: treat it as a prose control rather than the sole basis for broad claims.
+
+## Success Criteria
+The research succeeds if it produces a reproducible corpus, real LLM outputs, interpretable feature tables, statistical comparisons, classifier/ablation results, visualizations, and a REPORT.md that gives a clear, qualified answer to the research question.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          LITERATURE REVIEW
+════════════════════════════════════════════════════════════════════════════════
+
+# Literature Review: Narrative Space in LLMs
+
+## Review Scope
+
+### Research Question
+
+Do large language models produce spatial-navigation narratives with structural patterns that differ from human spatial narratives, and can those differences be measured as a distinct LLM "grammar" of narrative space?
+
+### Inclusion Criteria
+
+- Papers on LLM or neural spatial reasoning, navigation, route instructions, or spatial cognition.
+- Papers on story generation, story planning, narrative preference, or narrative theory for LLMs.
+- Papers providing measurable human-vs-LLM linguistic, rhetorical, lexical, syntactic, or diversity features.
+- Papers or datasets that can support automated experiments on human and LLM spatial narratives.
+
+### Exclusion Criteria
+
+- Pure robotics navigation papers without language analysis.
+- General LLM reasoning papers without spatial, narrative, or style relevance.
+- Very large datasets requiring unavailable gated media unless text annotations are usable independently.
+
+### Search Log
+
+| Date | Query | Source | Results | Notes |
+|------|-------|--------|---------|-------|
+| 2026-06-08 | "large language models spatial narratives navigation story generation" | paper-finder | stalled | Process did not return; manual search used. |
+| 2026-06-08 | "LLM spatial reasoning navigation text-based environments paper arXiv 2024" | web/arXiv | multiple | Found VoT, Tag Map, spatial cognition work. |
+| 2026-06-08 | "Do LLMs write like humans Variation in grammatical and rhetorical styles" | web/arXiv/PNAS | direct hit | Key feature-based human-vs-LLM style paper. |
+| 2026-06-08 | "Room-to-Room Vision-and-Language Navigation paper PDF arXiv" | web/arXiv/GitHub | direct hits | Found R2R paper, data, simulator. |
+| 2026-06-08 | "Plan-And-Write Towards Better Automatic Storytelling arXiv" | web/arXiv | direct hit | Story planning baseline. |
+| 2026-06-08 | "StoryAlign reward models story generation human preferences" | web/arXiv/GitHub/HF | direct hit | Recent story-preference benchmark and LongStory dataset. |
+
+## Key Papers
+
+### Vision-and-Language Navigation: Interpreting visually-grounded navigation instructions in real environments
+
+- Authors: Anderson et al.
+- Year: 2018
+- Key contribution: Introduces Matterport3D Simulator and R2R, a benchmark of human-written indoor navigation instructions.
+- Methodology: Crowdworkers wrote three navigation instructions for each sampled route through real Matterport3D indoor scenes.
+- Datasets used: Matterport3D and R2R.
+- Results: R2R contains 7,189 paths and roughly 21.5k instructions; baseline seq2seq agents substantially trail oracle/shortest-path performance, especially in unseen environments.
+- Relevance: Primary human spatial-language source. The instructions encode how people lexicalize room transitions, landmarks, turning, stopping, and goal descriptions.
+
+### Speaker-Follower Models for Vision-and-Language Navigation
+
+- Authors: Fried et al.
+- Year: 2018
+- Key contribution: Uses a learned speaker model to synthesize navigation instructions and improve an instruction-following agent.
+- Methodology: Speaker-driven data augmentation, pragmatic reasoning over candidate trajectories, panoramic action space.
+- Datasets used: R2R.
+- Results: More than doubled success over earlier baselines in the R2R setting.
+- Relevance: Provides a precedent for comparing human and model-generated navigation instructions.
+
+### Room-Across-Room
+
+- Authors: Ku et al.
+- Year: 2020
+- Key contribution: Larger multilingual VLN dataset with dense word-to-pose grounding.
+- Methodology: Multilingual route-instruction collection with synchronized pose traces.
+- Datasets used: RxR plus R2R.
+- Relevance: Useful future extension if experiments need time-aligned route language; not downloaded here because R2R is sufficient and lighter.
+
+### Mind's Eye of LLMs: Visualization-of-Thought
+
+- Authors: Wu et al.
+- Year: 2024
+- Key contribution: Proposes prompting LLMs to visualize state after reasoning steps.
+- Methodology: Tests GPT-4 variants on natural-language navigation, visual navigation, and visual tiling in 2D grids.
+- Datasets used: Generated square-map and tiling tasks.
+- Results: VoT improves GPT-4 over CoT across tasks, for example visual navigation 40.77 vs 37.02 and visual tiling 14.72 vs 9.48, but state visualization accuracy remains low.
+- Relevance: Strong evidence that verbal reasoning alone is brittle for spatial tasks; suggests experiments should look for whether LLM stories maintain an implicit map.
+
+### Tag Map
+
+- Authors: Zhang et al.
+- Year: 2024
+- Key contribution: Builds explicit text-based maps that can ground LLM planning.
+- Methodology: Uses image-tagging models to create localized semantic tag maps and lets GPT-4 query the map through function calls.
+- Datasets used: Matterport3D/OpenScene-style scene data and real-robot data.
+- Results: Tag maps achieved competitive object localization precision/recall with much lower memory than embedding maps; real-robot demos showed task-grounded navigation.
+- Relevance: Provides a representation idea for evaluating narratives: convert generated stories into explicit location/object/transition graphs.
+
+### Spatial Representation of LLMs in 2D Scene
+
+- Authors: Wu and Deng
+- Year: 2025
+- Key contribution: Compares LLM spatial preposition behavior with human spatial-representation data.
+- Methodology: Spatial generation and rating tasks over 2D scenes; compared GPT-4, GPT-3.5, Qwen, Llama, and others to human data.
+- Results: LLMs resemble humans in preferring vertical spatial terms, but do not reproduce human axis-specific representation patterns; GPT-4 is stronger on above/below/left than right.
+- Relevance: Supports the hypothesis that LLM spatial language can be superficially human-like while diverging in deeper representation.
+
+### Evaluating and Enhancing Spatial Cognition Abilities of LLMs
+
+- Authors: Yang et al.
+- Year: 2025
+- Key contribution: Benchmarks landmark, route, and survey knowledge in LLMs and proposes Hybrid Mind.
+- Methodology: 105 manually crafted spatial cognition questions across seven categories; tool-augmented mental-map builder with deterministic GIS algorithms.
+- Results: Mainstream LLMs performed poorly across most tasks, especially route and survey knowledge; GPT-4-turbo answered fewer than one-quarter correctly, while Hybrid Mind reached 70.48%.
+- Relevance: Directly frames navigation language as landmark-route-survey transformations. PDF download was blocked, but the article full text was accessible.
+
+### Do LLMs write like humans?
+
+- Authors: Reinhart et al.
+- Year: 2024/2025
+- Key contribution: Measures grammatical and rhetorical style differences between humans, GPT-4o, and Llama 3 variants.
+- Methodology: Parallel human/LLM corpora; Biber-style features; random forest classification.
+- Datasets used: Human-AI Parallel English corpus and COCA AI Parallel corpus.
+- Results: LLMs systematically overuse features such as present participial clauses, subject that-clauses, nominalizations, and phrasal coordination; instruction-tuned models differ more from humans than base Llama models.
+- Relevance: Supplies the core measurement framework for an "LLM grammar" of spatial narrative.
+
+### StoryAlign
+
+- Authors: Xia et al.
+- Year: 2026
+- Key contribution: Evaluates and trains reward models for story preferences.
+- Methodology: STORYRMB benchmark with 1,133 human-verified prompt/story preference instances across coherence, creativity, characterization, fluency, and relevance; builds about 100k preference pairs.
+- Results: Existing reward models struggle; best general model reached 66.3% while StoryReward-Qwen reached 75.0% average.
+- Relevance: Confirms that LLM stories diverge from human preferences on narrative structure, not just grammar.
+
+### Narrative Theory-Driven LLM Methods Survey
+
+- Authors: Liu, Joshi, Dawson
+- Year: 2026
+- Key contribution: Surveys narrative-theory-driven LLM methods and argues against a single generic narrative-quality benchmark.
+- Relevance: Supports using theory-specific metrics: spatial deixis, route continuity, landmark introduction, discourse order, map consistency, and narrative perspective.
+
+## Common Methodologies
+
+- Feature-based corpus comparison: Use Biber/pseudobibeR-style grammatical and rhetorical counts, lexical diversity, syntactic complexity, and classifier feature importance.
+- Route graph extraction: Extract entities, places, landmarks, turns, and transitions from text; evaluate graph/map consistency.
+- Controlled spatial QA: Use bAbI path and positional tasks or generated map tasks to isolate spatial reasoning failures.
+- Human vs model parallel prompts: Hold prompts fixed and compare human-authored or human-continuation text against LLM completions.
+- Preference and human evaluation: Rate stories by coherence, relevance, creativity, characterization, and fluency.
+
+## Standard Baselines
+
+- Human corpus baseline: R2R human route instructions and spatially filtered WritingPrompts.
+- LLM generation baseline: Generate stories from identical building-navigation prompts across multiple models/settings.
+- Text-only feature baseline: Biber features, lexical diversity, sentence length, POS/dependency patterns.
+- Spatial consistency baseline: Deterministic path parser or graph validator over extracted locations and transitions.
+- Story-quality baseline: Coherence/relevance/fluency metrics plus StoryAlign-style preference criteria.
+
+## Evaluation Metrics
+
+- Linguistic features: nominalizations, participial clauses, passives, coordination, prepositional phrases, type-token ratios, lexical repetition.
+- Spatial narrative features: count/order of landmarks, place introductions, deixis, turn verbs, directional terms, revisits, impossible transitions, route closure, perspective shifts.
+- Classification metrics: human-vs-LLM accuracy, F1, ROC-AUC, feature importance.
+- Spatial correctness: path validity, graph consistency, percentage of resolvable transitions, landmark-route-survey transformations.
+- Narrative quality: coherence, creativity, characterization, fluency, relevance, human preference accuracy.
+
+## Datasets in the Literature and Workspace
+
+- R2R: Human indoor route instructions. Best primary dataset for human spatial-navigation language.
+- RxR: Larger multilingual extension with word-pose alignments. Useful later, not downloaded now.
+- Human-AI Parallel Corpus: Human/LLM text pairs for feature baselines.
+- WritingPrompts: Human fiction prompts and stories; workspace includes a 500-record spatial keyword sample.
+- LongStory: AI-generated long stories from StoryWriter; useful for AI story contrast.
+- bAbI tasks 17 and 19: Controlled positional and path-finding text reasoning.
+
+## Gaps and Opportunities
+
+- Existing VLN datasets are instructions, not full literary stories; experiments should distinguish route-instruction grammar from narrative-prose grammar.
+- Story-generation benchmarks rarely focus on spatial consistency or navigable built environments.
+- LLM spatial-language outputs may look fluent while failing survey-map consistency; this should be measured directly.
+- Human-vs-LLM style studies are mostly genre-level, not spatial-narrative-specific.
+- Existing reward models for story generation may reward fluency/verbosity more than coherent spatial narrative structure.
+
+## Recommendations for Our Experiment
+
+- Primary human spatial baseline: R2R instructions, supplemented by spatially filtered WritingPrompts for more narrative prose.
+- Primary AI comparison data: Generate matched spatial-navigation stories from current LLMs; also use LongStory as a general AI-story background corpus.
+- Core hypothesis test: Extract linguistic features and spatial-route graphs from human and LLM texts, then test whether model outputs form a separable cluster.
+- Recommended feature families:
+  - Biber/pseudobibeR grammatical features.
+  - Spatial preposition and direction-term distributions.
+  - Landmark introduction/reuse patterns.
+  - Transition graph validity and revisits.
+  - Discourse ordering: egocentric route order vs survey/map-like summaries.
+- Recommended baselines:
+  - Human R2R vs LLM-rewritten R2R route stories.
+  - Human WritingPrompts spatial sample vs LLM completions from same prompts.
+  - Controlled bAbI path/position probes for spatial consistency sanity checks.
+- Recommended metrics:
+  - Human-vs-LLM classifier performance with feature ablation.
+  - Spatial graph consistency score.
+  - Lexical/syntactic diversity.
+  - StoryAlign-style human preference dimensions if human or LLM-judge evaluation is added.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          PAPER REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+Generate a complete academic paper with the following structure:
+
+1. TITLE
+   - Clear, specific, informative
+   - Should convey main finding or contribution
+
+2. AUTHOR
+   - Use this exact author line in the \author{} block: Ari Holtzman and NeuriCo
+
+3. ABSTRACT (150-250 words)
+   - Problem statement
+   - Approach
+   - Key results
+   - Significance
+
+4. INTRODUCTION
+   - Research problem and motivation
+   - Gap in existing work
+   - Our contribution (be specific)
+   - Paper organization
+
+5. RELATED WORK
+   - Organized by theme/approach
+   - Position our work relative to prior work
+   - Cite papers from literature review
+
+6. METHODOLOGY
+   - Clear description of approach
+   - Experimental setup
+   - Datasets used
+   - Evaluation metrics
+   - Baselines
+
+7. RESULTS
+   - Present results with tables and figures
+   - Statistical analysis
+   - Comparison to baselines
+   - Ablation studies (if applicable)
+
+8. DISCUSSION
+   - Interpretation of results
+   - Limitations
+   - Broader implications
+
+9. CONCLUSION
+   - Summary of contributions
+   - Key findings
+   - Future work
+
+10. REFERENCES
+   - BibTeX format
+   - All cited papers
+
+════════════════════════════════════════════════════════════════════════════════
+                          OUTPUT FORMAT
+════════════════════════════════════════════════════════════════════════════════
+
+Create a MODULAR LaTeX project with the following directory structure:
+
+paper_draft/
+├── main.tex              # Main file that imports all sections
+├── references.bib        # BibTeX references
+├── sections/
+│   ├── abstract.tex      # Abstract content
+│   ├── introduction.tex  # Introduction section
+│   ├── related_work.tex  # Related work section
+│   ├── methodology.tex   # Methodology section
+│   ├── results.tex       # Results section
+│   ├── discussion.tex    # Discussion section
+│   └── conclusion.tex    # Conclusion section
+├── figures/              # Directory for any generated figures
+├── tables/               # Directory for complex standalone tables
+└── appendix/             # Directory for appendix sections (if needed)
+
+INSTRUCTIONS:
+1. First, create the directory structure above (mkdir -p paper_draft/sections paper_draft/figures paper_draft/tables paper_draft/appendix)
+2. Write main.tex using the EXACT preamble for NEURIPS:
+
+   \documentclass{article}
+   \usepackage[final]{neurips_2025}  % NEURIPS style (neurips_2025.sty is in paper_draft/)
+   \usepackage[hidelinks]{hyperref}  % REQUIRED: clickable links
+   \usepackage{booktabs}  % REQUIRED: professional tables
+   \usepackage{graphicx}
+   \usepackage{amsmath,amssymb}
+
+   % Import command files
+   \input{commands/math}
+   \input{commands/general}
+   \input{commands/macros}
+
+   % Use this bibliography style:
+   \bibliographystyle{plainnat}
+
+   \author{Ari Holtzman and NeuriCo}
+
+   - Use \input{sections/...} to include each section
+   - Use \bibliography{references} for references
+3. Write each section file with COMPLETE content (no placeholders)
+4. Each section file should include its \section{} command
+5. Write references.bib with all citations in BibTeX format
+6. After writing all files, compile the paper:
+   cd paper_draft && pdflatex -interaction=nonstopmode main.tex && bibtex main && pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex
+
+This modular structure allows humans to easily:
+- Edit individual sections without navigating a large file
+- Track changes per section
+- Reuse sections across different paper versions
+
+════════════════════════════════════════════════════════════════════════════════
+                          QUALITY REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+- Academic tone throughout
+- All claims must be supported by data from the experiment report
+- Proper citations using \cite{} commands
+- Clear figures and tables with proper captions
+- NO placeholder text - every section must have real content
+- The paper MUST compile without errors
+- If compilation fails, debug and fix the LaTeX errors
+
+════════════════════════════════════════════════════════════════════════════════
+                          LAB WRITING STYLE
+════════════════════════════════════════════════════════════════════════════════
+
+Follow these lab-specific conventions to match our paper style:
+
+1. LANGUAGE STYLE:
+   - Use active voice: "We propose", "We examine", "We focus on"
+   - Be direct and confident: "Our main question is...", "We hypothesize that..."
+   - State things clearly and simply - prefer plain language over jargon
+   - Use bold questions as paragraph organizers: {\bf what is X?}
+   - Include specific quantitative claims: "8.97% over baseline"
+   - Avoid fancy wording: "utilize" → "use", "facilitate" → "help"
+
+2. INTRODUCTION STRUCTURE:
+   - Engaging hook (get to the point quickly)
+   - Problem importance
+   - Gap identification
+   - Your approach with method figure reference
+   - Quantitative preview of results
+   - Contribution bullets (3-4 items, action verbs)
+
+3. CONTRIBUTION LISTS:
+   \begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+       \item We propose...
+       \item We conduct...
+       \item We complement...
+   \end{itemize}
+
+4. MODULAR COMMANDS STRUCTURE:
+   Command templates are pre-copied to paper_draft/commands/:
+   - math.tex: Math notation macros
+   - general.tex: Formatting macros
+   - macros.tex: Project-specific term definitions (customize this for your paper)
+
+   In main.tex, include:
+   \input{commands/math}
+   \input{commands/general}
+   \input{commands/macros}
+
+5. REFERENCE CONVENTIONS:
+   Use reference macros from math.tex:
+   - \figref{fig:name} for "figure 1" (lowercase, in-sentence)
+   - \Figref{fig:name} for "Figure 1" (capitalized, start of sentence)
+   - \secref{sec:name} for "section 2"
+
+6. TEXT FORMATTING:
+   - Use \para{Header text} for bold paragraph headers
+   - Define method/dataset names with \textsc and \xspace:
+     \newcommand{\methodname}{\textsc{MethodName}\xspace}
+
+7. TABLE FORMATTING:
+   - Use booktabs package (no vertical lines)
+   - Use \resizebox{\textwidth}{!}{...} for wide tables
+   - Use @{} to remove padding at table edges
+   - Use \cmidrule(lr){x-y} for sub-headers
+   - Use \textsc{} for dataset/method names in headers
+   - Bold best results with {\bf ...}
+
+8. FIGURE FORMATTING:
+   - Use 0.32\textwidth for 3-column subfigures
+   - Use 0.95\linewidth for full-width figures
+   - Use \input{figures/legend} for shared legends
+   - Write self-contained captions explaining key observations
+
+9. RESULTS PRESENTATION:
+   - Define \increase and \decrease for colored arrows (green up, red down)
+   - Bold best results in tables
+   - Report confidence intervals when available
+
+10. ALGORITHM STYLING:
+    - Use algpseudocode with [noend]
+    - Use \triangleright for comments
+
+11. HYPERLINKS (REQUIRED):
+    - Always use \usepackage[hidelinks]{hyperref} or with colored links
+    - All citations, section refs, figure refs, table refs must be clickable
+    - This is essential for reader navigation
+
+════════════════════════════════════════════════════════════════════════════════
+                          WORKFLOW: REVIEW AND REFLECT
+════════════════════════════════════════════════════════════════════════════════
+
+Before calling finish, you MUST complete these review steps:
+
+1. REVIEW RESOURCES (at the start):
+   - Read .codex/skills/paper-writer/SKILL.md for detailed guidance
+   - Study templates/paper_writing/lab_style_guide.md for style conventions
+   - Browse paper_examples/ for formatting and language patterns
+
+2. SELF-REFLECTION (before finishing):
+   After writing all sections, review your work against these criteria:
+
+   LANGUAGE CHECK:
+   - [ ] Is the writing clear and jargon-free?
+   - [ ] Are claims specific with quantitative support?
+   - [ ] Is active voice used throughout?
+
+   FORMATTING CHECK:
+   - [ ] Does main.tex include \input{commands/math}, \input{commands/general}, \input{commands/macros}?
+   - [ ] Is hyperref package included for clickable references?
+   - [ ] Do tables use booktabs (no vertical lines)?
+   - [ ] Are best results bolded in tables?
+   - [ ] Are figures/tables properly captioned?
+
+   STRUCTURE CHECK:
+   - [ ] Does introduction follow: hook → importance → gap → approach → preview → contributions?
+   - [ ] Are contribution bullets specific with action verbs?
+   - [ ] Does the paper compile without errors?
+
+3. FIX ISSUES:
+   - Address any issues found in the self-reflection
+   - Re-compile and verify the PDF looks correct
+
+Only after completing this review should you consider the paper finished.

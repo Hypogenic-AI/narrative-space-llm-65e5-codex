@@ -1,0 +1,156 @@
+{
+  "n_main_texts": 228,
+  "n_human": 114,
+  "n_llm": 114,
+  "sources": [
+    {
+      "source": "r2r",
+      "author": "human",
+      "n": 80
+    },
+    {
+      "source": "r2r",
+      "author": "llm",
+      "n": 80
+    },
+    {
+      "source": "writingprompts",
+      "author": "human",
+      "n": 34
+    },
+    {
+      "source": "writingprompts",
+      "author": "llm",
+      "n": 34
+    }
+  ],
+  "best_classification": [
+    {
+      "scope": "r2r",
+      "feature_family": "length_only",
+      "n": 160,
+      "n_features": 3,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "fold_accuracy_mean": 1.0,
+      "fold_accuracy_std": 0.0,
+      "fold_accuracy_ci_low": 1.0,
+      "fold_accuracy_ci_high": 1.0,
+      "permutation_score": NaN,
+      "permutation_p": NaN
+    },
+    {
+      "scope": "r2r",
+      "feature_family": "narrative",
+      "n": 160,
+      "n_features": 6,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "fold_accuracy_mean": 1.0,
+      "fold_accuracy_std": 0.0,
+      "fold_accuracy_ci_low": 1.0,
+      "fold_accuracy_ci_high": 1.0,
+      "permutation_score": NaN,
+      "permutation_p": NaN
+    },
+    {
+      "scope": "r2r",
+      "feature_family": "all_no_length",
+      "n": 160,
+      "n_features": 28,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "fold_accuracy_mean": 1.0,
+      "fold_accuracy_std": 0.0,
+      "fold_accuracy_ci_low": 1.0,
+      "fold_accuracy_ci_high": 1.0,
+      "permutation_score": NaN,
+      "permutation_p": NaN
+    },
+    {
+      "scope": "r2r",
+      "feature_family": "all",
+      "n": 160,
+      "n_features": 31,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "fold_accuracy_mean": 1.0,
+      "fold_accuracy_std": 0.0,
+      "fold_accuracy_ci_low": 1.0,
+      "fold_accuracy_ci_high": 1.0,
+      "permutation_score": NaN,
+      "permutation_p": NaN
+    },
+    {
+      "scope": "r2r",
+      "feature_family": "spatial",
+      "n": 160,
+      "n_features": 13,
+      "accuracy": 0.98125,
+      "f1": 0.9815950920245399,
+      "roc_auc": 1.0,
+      "fold_accuracy_mean": 0.98125,
+      "fold_accuracy_std": 0.02795084971874737,
+      "fold_accuracy_ci_low": 0.95625,
+      "fold_accuracy_ci_high": 1.0,
+      "permutation_score": NaN,
+      "permutation_p": NaN
+    }
+  ],
+  "top_llm_features": [
+    {
+      "feature": "first_person_per_1000",
+      "logistic_coef_llm": 1.4626612715164424,
+      "abs_coef": 1.4626612715164424
+    },
+    {
+      "feature": "word_count",
+      "logistic_coef_llm": 1.434041385932733,
+      "abs_coef": 1.434041385932733
+    },
+    {
+      "feature": "hapax_ratio",
+      "logistic_coef_llm": 1.2174705086014708,
+      "abs_coef": 1.2174705086014708
+    },
+    {
+      "feature": "formulaic_phrase_per_1000",
+      "logistic_coef_llm": 1.089376720519992,
+      "abs_coef": 1.089376720519992
+    },
+    {
+      "feature": "sensory_per_1000",
+      "logistic_coef_llm": 0.9905407504967144,
+      "abs_coef": 0.9905407504967144
+    },
+    {
+      "feature": "landmark_reuse_ratio",
+      "logistic_coef_llm": 0.9715906377017569,
+      "abs_coef": 0.9715906377017569
+    },
+    {
+      "feature": "survey_route_ratio",
+      "logistic_coef_llm": -0.8958199192116066,
+      "abs_coef": 0.8958199192116066
+    },
+    {
+      "feature": "dialogue_mark_density",
+      "logistic_coef_llm": -0.8603421248609306,
+      "abs_coef": 0.8603421248609306
+    },
+    {
+      "feature": "sentence_count",
+      "logistic_coef_llm": -0.8450974943467148,
+      "abs_coef": 0.8450974943467148
+    },
+    {
+      "feature": "narrative_route_ratio",
+      "logistic_coef_llm": -0.8354566333440667,
+      "abs_coef": 0.8354566333440667
+    }
+  ]
+}

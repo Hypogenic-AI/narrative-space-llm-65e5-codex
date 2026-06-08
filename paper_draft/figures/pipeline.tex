@@ -1,0 +1,21 @@
+\begin{figure}[t]
+    \centering
+    \setlength{\fboxsep}{6pt}
+    \fbox{%
+    \begin{minipage}{0.94\linewidth}
+    \small
+    \begin{tabular}{@{}p{0.22\linewidth}p{0.22\linewidth}p{0.23\linewidth}p{0.22\linewidth}@{}}
+        \textbf{Paired corpora} &
+        \textbf{\llm generation} &
+        \textbf{Feature grammar} &
+        \textbf{Evaluation} \\
+        \midrule
+        80 \rtr route cases and 34 spatial \writingprompts prompts &
+        \gptmini stories with fixed seed, temperature 0.7, and cached prompts &
+        Length/generic, spatial, and narrative feature families &
+        Feature tests, classifier ablations, permutation tests, and \longstory transfer \\
+    \end{tabular}
+    \end{minipage}}
+    \caption{Overview of the experiment. We compare human spatial texts with matched \gptmini generations, extract interpretable spatial and narrative features, and test which feature families separate author class.}
+    \label{fig:pipeline}
+\end{figure}

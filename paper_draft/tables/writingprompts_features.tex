@@ -1,0 +1,18 @@
+\begin{table}[t]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lrrlr@{}}
+        \toprule
+        \textbf{Feature} & \textbf{Human mean} & \textbf{\llm mean} & \textbf{Direction} & \textbf{BH $q$} \\
+        \midrule
+        \texttt{landmark\_per\_1000} & 9.79 & 32.92 & \llm higher & $4.62{\times}10^{-8}$ \\
+        \texttt{sensory\_per\_1000} & 5.93 & 16.75 & \llm higher & $1.19{\times}10^{-7}$ \\
+        \texttt{route\_step\_density} & 43.55 & 64.90 & \llm higher & $8.33{\times}10^{-6}$ \\
+        \texttt{motion\_per\_1000} & 7.81 & 16.92 & \llm higher & $7.06{\times}10^{-5}$ \\
+        \texttt{formulaic\_phrase\_per\_1000} & 0.28 & 2.79 & \llm higher & $1.96{\times}10^{-4}$ \\
+        \texttt{survey\_route\_ratio} & 0.289 & 0.117 & \llm lower & $5.60{\times}10^{-4}$ \\
+        \bottomrule
+    \end{tabular}}
+    \caption{Key feature differences within the \writingprompts prose-control subset. Both human and \llm texts are prose, yet \gptmini still uses more landmarks, movement language, sensory detail, and formulaic phrasing.}
+    \label{tab:writingprompts-features}
+\end{table}

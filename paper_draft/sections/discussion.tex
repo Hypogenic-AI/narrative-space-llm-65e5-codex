@@ -1,0 +1,17 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\para{What does the fingerprint mean?}
+The results support a measurable \llm spatial-narrative profile under the tested conditions. The clearest pattern is that \gptmini turns movement through built space into an embodied scene: it writes in first person, adds sensory detail, repeats landmarks, uses formulaic scene beats, and closes routes explicitly. Human \rtr language is more terse, imperative, and task-directed. The \writingprompts control shows that this pattern does not disappear when both sides are prose, although the evidence there is based on only 34 prompt-matched pairs.
+
+\para{Why length is not enough.}
+Length matters: the length-only classifier reaches 87.7\% accuracy in the full corpus. But it does not explain the result. All non-length features reach 96.5\% accuracy, spatial-only features reach 87.7\%, and the \writingprompts subset remains separable even when length-only performance drops to 69.1\%. The feature tests also point to interpretable spatial and narrative differences, not only longer output.
+
+\para{What we cannot claim.}
+This study measures textual behavior, not model cognition. The results do not prove that \llms lack spatial maps, possess spatial maps, or use a stable internal representation of built space. They show that, under this prompt design, a current instruction-following model produces spatial stories with a distinctive feature profile. The profile may reflect training data, RLHF/RLAIF style, prompt wording, instruction-following behavior, or genre conventions.
+
+\para{Limitations.}
+The largest limitation is the \rtr genre confound: human texts are route instructions, while model texts are requested stories. Spatial-only and non-length ablations reduce this concern but do not remove it. The \writingprompts control is closer to the target question but small. The study tests one model, \gptmini, at one temperature and one prompt style. First-person effects partly follow from the prompt. Feature extraction is regex-based and approximate, favoring interpretability over parser-level precision. Finally, no human annotators judged route validity, spatial coherence, or narrative quality.
+
+\para{Implications.}
+For synthetic data, the findings argue for measuring spatial-narrative structure before mixing model-written stories with human spatial language. For embodied-agent evaluation, they suggest that route-like prose can look coherent while encoding different landmark and perspective habits. For story-generation research, they show that domain-specific narrative attributes can reveal differences that generic quality scores or broad style classifiers may miss.

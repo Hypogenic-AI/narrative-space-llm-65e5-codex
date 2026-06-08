@@ -1,0 +1,21 @@
+\begin{table}[t]
+    \centering
+    \begin{tabular}{@{}lr@{}}
+        \toprule
+        \textbf{Feature} & \textbf{Coefficient} \\
+        \midrule
+        \texttt{first\_person\_per\_1000} & 1.463 \\
+        \texttt{word\_count} & 1.434 \\
+        \texttt{hapax\_ratio} & 1.217 \\
+        \texttt{formulaic\_phrase\_per\_1000} & 1.089 \\
+        \texttt{sensory\_per\_1000} & 0.991 \\
+        \texttt{landmark\_reuse\_ratio} & 0.972 \\
+        \texttt{survey\_route\_ratio} & -0.896 \\
+        \texttt{dialogue\_mark\_density} & -0.860 \\
+        \texttt{sentence\_count} & -0.845 \\
+        \texttt{narrative\_route\_ratio} & -0.835 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Top standardized logistic coefficients for predicting \llm authorship. Positive coefficients are \llm-leaning and negative coefficients are human-leaning.}
+    \label{tab:top-coefficients}
+\end{table}

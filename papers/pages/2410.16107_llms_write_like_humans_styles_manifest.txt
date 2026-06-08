@@ -1,0 +1,8 @@
+PDF: papers/2410.16107_llms_write_like_humans_styles.pdf
+Total pages: 7
+Pages per chunk: 3
+
+Chunks:
+  2410.16107_llms_write_like_humans_styles_chunk_001.pdf: pages 1-3
+  2410.16107_llms_write_like_humans_styles_chunk_002.pdf: pages 4-6
+  2410.16107_llms_write_like_humans_styles_chunk_003.pdf: page 7

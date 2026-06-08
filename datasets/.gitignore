@@ -1,0 +1,9 @@
+# Exclude all data files; keep only documentation and small samples.
+*
+!.gitignore
+!README.md
+!**/README.md
+!**/samples/
+!**/samples/**
+!**/download.sh
+!**/download_instructions.txt
